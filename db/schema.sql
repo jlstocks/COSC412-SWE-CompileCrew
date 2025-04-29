@@ -1,6 +1,3 @@
-CREATE DATABASE IF NOT EXISTS stackntrack;
-USE stackntrack;
-
 # Create User table
 CREATE TABLE User (
     userID INT AUTO_INCREMENT,
