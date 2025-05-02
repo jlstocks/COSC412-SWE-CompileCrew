@@ -43,6 +43,8 @@ select {
 	background-color: white;
 	margin: auto;
 	max-width: 60%;
+	border-style: solid;
+	border-color: black;
 
 }
 
@@ -124,8 +126,6 @@ select {
 
 }
 
-/* login.html */
-
 #BasicDiv {
 
 	background-color: white;
@@ -164,7 +164,7 @@ select {
 
 	font-size: clamp(16px, 1vw, 32px);
 	margin-top: 2%;
-	margin-bottom: 2%;
+	margin-bottom: 5%;
 
 }
 
@@ -176,9 +176,15 @@ select {
 
 }
 
-/* signup.html none*/
+/*recentexpenses.html*/
 
-/* addExpences.html none*/
+#expense {
+
+	margin-left: 5%;
+	margin-bottom: 10%;
+
+}
+
 
 
 
