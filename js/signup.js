@@ -1,33 +1,33 @@
-document.addEventListener('DOMContentLoaded', function(){
+document.addEventListener('DOMContentLoaded', () => {
     const signupButton = document.querySelector('#confirmbutton');
     const inputs = document.querySelectorAll('#inputs input');
 
-    //handle button click
+    //handles form submission
     signupButton.addEventListener('click', handleSignup);
+    inputs.forEach(input => input.addEventListener('keypress', (e) => e.key === 'Enter' && handleSignup()));
 
-    //checks for 'Enter' key in any input
-    inputs.forEach(input => {
-        input.addEventListener('keypress', function(e){
-            if (e.key === 'Enter') handleSignup();
-        });
-    });
-
-    function handleSignup(){
+    function handleSignup() {
+        //get input values
         const name = document.querySelector('input[placeholder="Name"]').value.trim();
         const email = document.querySelector('.newEmail').value.trim();
-        const balance = parseFloat(document.querySelector('.newBalance').value.trim());
+        const balance = parseFloat(document.querySelector('.newBalance').value.trim()) || 0;
         const username = document.querySelector('.newUsername').value.trim();
         const password = document.querySelector('.newPassword').value.trim();
         const password2 = document.querySelector('.password2').value.trim();
 
         //validation
-        if (!name || !email || !username || !password || !password2 || isNaN(balance)) {
-            alert('Please fill in all required fields correctly');
+        if (!name || !email || !username || !password || !password2 || isNaN(balance)){
+            alert('Please fill in all of the fields correctly');
             return;
         }
 
         if (password !== password2){
-            alert('The passwords do not match!');
+            alert('Invalid: Passwords do not match!');
+            return;
+        }
+
+        if (password.length < 6){
+            alert('Invalid: Password needs to be at least 6 characters!');
             return;
         }
 
@@ -38,13 +38,20 @@ document.addEventListener('DOMContentLoaded', function(){
             return;
         }
 
-        //creates user
-        const newUser = { name, email, balance, username, password };
+        //creates new user w/budget & defaults to balance
+        const newUser = { 
+            name, 
+            email, 
+            balance,
+            budget: balance, //initialize budget = balance
+            username, 
+            password 
+        };
+
+        //save and redirects
         users.push(newUser);
         localStorage.setItem('users', JSON.stringify(users));
         localStorage.setItem('currentUser', JSON.stringify(newUser));
-        
-        //redirect
         window.location.href = 'index.html';
     }
 });
