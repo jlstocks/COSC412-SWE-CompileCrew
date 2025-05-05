@@ -10,7 +10,8 @@ import {
   TypingIndicator
 } from "@chatscope/chat-ui-kit-react";
 
-const API_KEY = "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";
+const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+console.log("Loaded API Key:", API_KEY);
 
 function App() {
   const [typing, setTyping] = useState(false);
@@ -101,3 +102,4 @@ function App() {
 }
 
 export default App;
+
