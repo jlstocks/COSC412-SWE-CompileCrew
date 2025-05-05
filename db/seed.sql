@@ -10,7 +10,10 @@ INSERT INTO Account (accID, userID, balance) VALUES
 # Category Table Data
 INSERT INTO Category (categoryID, name, description) VALUES 
 (1, 'Food', 'Expenses for groceries and restaurants.'),
-(2, 'Transportation', 'Expenses for gas, bus, train, etc.');
+(2, 'Transportation', 'Expenses for gas, bus, train, etc.'),
+(3, 'Recreation', 'Expenses for recreational activity.'),
+(4, 'Work-related', 'Work-related purchaes.'),
+(5,'Home', 'Expenses for home-improvement, rent, etc.');
 
 # Budget Table Data
 INSERT INTO Budget (budgetID, userID, limitAmount, startDate, endDate) VALUES 

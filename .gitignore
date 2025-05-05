@@ -1,30 +1,37 @@
-<<<<<<< HEAD
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Dependency directories
+node_modules/
+
+# macOS system files
+.DS_Store
+
 # Logs
-logs
 *.log
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-node_modules
-dist
-dist-ssr
-*.local
 
 # Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-=======
-node_modules/
-.env
-.DS_Store
->>>>>>> bb68e3c6e953ad4abfdc688316040568f8fb3ab7
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Database files
+*.sqlite
+*.db
+
+# Local database connection settings
+db.js
+
+# Build outputs
+/dist/
+/build/
+
+# Cache
+.npm
+.eslintcache
