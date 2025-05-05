@@ -11,7 +11,7 @@ import {
 } from "@chatscope/chat-ui-kit-react";
 
 const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
-console.log("Loaded API Key:", API_KEY);
+console.log("Loaded API Key:", import.meta.env.VITE_OPENAI_API_KEY);
 
 function App() {
   const [typing, setTyping] = useState(false);
