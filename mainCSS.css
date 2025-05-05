@@ -136,6 +136,17 @@ select {
 
 }
 
+#BasicDivFix {
+
+	background-color: white;
+	margin: auto;
+	max-width: 45%;
+	border-color: black;
+	border-style: solid;
+	padding-bottom: 10%;
+
+}
+
 #center {
 
 	text-align: center;
