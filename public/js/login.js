@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function(){
         if (e.key === 'Enter') handleLogin();
     });
 
-    function handleLogin(){
+    async function handleLogin(){
         const username = usernameInput.value.trim();
         const password = passwordInput.value.trim();
 
@@ -23,22 +23,36 @@ document.addEventListener('DOMContentLoaded', function(){
             return;
         }
 
-        //check user 
-        const users = JSON.parse(localStorage.getItem('users')) || [];
-        const user = users.find(u => u.username === username);
+        try {
+            //send login request to server
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username,
+                    password
+                })
+            });
 
-        if (!user){
-            alert('Username not found');
-            return;
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Invalid username or password');
+            }
+
+            //store user in localStorage
+            localStorage.setItem('currentUser', JSON.stringify(data.user));
+            window.location.href = 'index.html';
+        } catch (error) {
+            
+            //handle errors
+            if (error.message.includes('Invalid username or password')) {
+                alert('Username or password incorrect');
+            } else {
+                alert('Error logging in: ' + error.message);
+            }
         }
-
-        if (user.password !== password){
-            alert('Password incorrect');
-            return;
-        }
-
-        //login success
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        window.location.href = 'index.html'; //redirect
     }
 });

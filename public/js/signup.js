@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     signupButton.addEventListener('click', handleSignup);
     inputs.forEach(input => input.addEventListener('keypress', (e) => e.key === 'Enter' && handleSignup()));
 
-    function handleSignup() {
+    async function handleSignup() {
         //get input values
         const name = document.querySelector('input[placeholder="Name"]').value.trim();
         const email = document.querySelector('.newEmail').value.trim();
@@ -31,27 +31,49 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        //checks if username exists
-        const users = JSON.parse(localStorage.getItem('users')) || [];
-        if (users.some(u => u.username === username)){
-            alert('Username already taken');
-            return;
+        try {
+            //send registration request to server
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name,
+                    email,
+                    username,
+                    password,
+                    balance
+                })
+            });
+
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Registration failed');
+            }
+
+            //create user object for localStorage
+            const newUser = { 
+                id: data.userId,
+                accountId: data.accountId,
+                name, 
+                email, 
+                balance,
+                budget: balance, // Initialize budget = balance
+                username
+            };
+
+            //store user info in localStorage
+            localStorage.setItem('currentUser', JSON.stringify(newUser));
+            window.location.href = 'index.html';
+        } catch (error) {
+            //handle registration errors
+            if (error.message.includes('Username already taken')) {
+                alert('Username already taken');
+            } else {
+                alert('Error registering: ' + error.message);
+            }
         }
-
-        //creates new user w/budget & defaults to balance
-        const newUser = { 
-            name, 
-            email, 
-            balance,
-            budget: balance, //initialize budget = balance
-            username, 
-            password 
-        };
-
-        //save and redirects
-        users.push(newUser);
-        localStorage.setItem('users', JSON.stringify(users));
-        localStorage.setItem('currentUser', JSON.stringify(newUser));
-        window.location.href = 'index.html';
     }
 });

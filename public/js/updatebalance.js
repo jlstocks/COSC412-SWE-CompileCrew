@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    //authication check
+    //authentication check
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     if (!currentUser) {
         alert('Please log in first');
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .map(sel => document.querySelector(sel));
     const confirmButton = document.querySelector('#confirmbutton');
 
-    confirmButton.addEventListener('click', () => {
+    confirmButton.addEventListener('click', async () => {
         //gets values 
         const balanceVal = balanceInput.value.trim();
         const budgetVal = budgetInput.value.trim();
@@ -33,43 +33,78 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        //processes balance
-        if (balanceVal) {
-            const newBalance = parseFloat(balanceVal);
-            if (isNaN(newBalance)) {
-                balanceInput.select();
-                alert('Please enter a valid number for balance');
-                return;
+        try {
+            //processes balance
+            if (balanceVal) {
+                const newBalance = parseFloat(balanceVal);
+                if (isNaN(newBalance)) {
+                    balanceInput.select();
+                    alert('Please enter a valid number for balance');
+                    return;
+                }
+                
+                //update balance on server
+                const balanceResponse = await fetch('/api/update-balance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: currentUser.id,
+                        accountId: currentUser.accountId,
+                        balance: newBalance
+                    })
+                });
+                
+                if (!balanceResponse.ok) {
+                    const data = await balanceResponse.json();
+                    throw new Error(data.error || 'Failed to update balance');
+                }
+                
+                currentUser.balance = newBalance;
             }
-            currentUser.balance = newBalance;
-        }
 
-        //processes budget
-        if (budgetVal) {
-            const newBudget = parseFloat(budgetVal);
-            if (isNaN(newBudget)) {
-                budgetInput.select();
-                alert('Please enter a valid number for budget');
-                return;
+            //processes budget
+            if (budgetVal) {
+                const newBudget = parseFloat(budgetVal);
+                if (isNaN(newBudget)) {
+                    budgetInput.select();
+                    alert('Please enter a valid number for budget');
+                    return;
+                }
+                
+                //update budget on server
+                const budgetResponse = await fetch('/api/update-budget', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: currentUser.id,
+                        budget: newBudget
+                    })
+                });
+                
+                if (!budgetResponse.ok) {
+                    const data = await budgetResponse.json();
+                    throw new Error(data.error || 'Failed to update budget');
+                }
+                
+                currentUser.budget = newBudget;
             }
-            currentUser.budget = newBudget;
+
+            //saves updates to localStorage
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            //updates UI
+            displayBalance();
+            displayBudget();
+            balanceInput.value = '';
+            budgetInput.value = '';
+
+            alert('Updated successfully!');
+        } catch (error) {
+            alert('Error updating: ' + error.message);
         }
-
-        //saves updates
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        
-        //updates users array
-        const users = JSON.parse(localStorage.getItem('users')) || [];
-        const index = users.findIndex(u => u.username === currentUser.username);
-        if (index !== -1) users[index] = currentUser;
-        localStorage.setItem('users', JSON.stringify(users));
-
-        //updates UI
-        displayBalance();
-        displayBudget();
-        balanceInput.value = '';
-        budgetInput.value = '';
-
-        alert('Updated successfully!');
     });
 });

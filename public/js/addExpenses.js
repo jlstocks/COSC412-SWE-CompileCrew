@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     //handles expenses
     confirmButton.addEventListener('click', addExpense);
 
-    function addExpense(){
+    async function addExpense(){
         //validation
         if (!expenseName.value.trim()){
             alert('Please enter a name for your expense. ex: "Groceries")');
@@ -59,7 +59,27 @@ document.addEventListener('DOMContentLoaded', () => {
             date: new Date().toISOString().split('T')[0],
             userId: currentUser.username //for multi-user support
         };
-
+        try {
+            const response = await fetch('/api/expenses', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userId: currentUser.id,
+                    accountId: currentUser.accountId,
+                    categoryId: category.id,
+                    amount: amount,
+                    name: expenseName.value.trim()
+                })
+            });
+            if (!response.ok){
+                const data = await response.json();
+                throw new Error(data.error || 'Failed to add expense');
+            }
+        const data = await response.json();
+        currentUser.balance = parseFloat(data.newBalance);
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
         //updates data
         updateExpenseData(currentUser, newExpense, amount);
 
@@ -70,12 +90,14 @@ document.addEventListener('DOMContentLoaded', () => {
         expenseType.selectedIndex = 0;
         
         alert(`Added ${category.name} expense: $${amount.toFixed(2)}`);
+    } catch (error) {
+        alert('Error adding expense: ' + error.message);
     }
+}
 
     function updateExpenseData(user, expense, amount){
         //updates user
         user.expenses = [...(user.expenses || []), expense];
-        user.balance -= amount;
         
         //saves to storage
         localStorage.setItem('currentUser', JSON.stringify(user));
@@ -83,13 +105,5 @@ document.addEventListener('DOMContentLoaded', () => {
         //updates global expenses
         const allExpenses = JSON.parse(localStorage.getItem('expenses')) || [];
         localStorage.setItem('expenses', JSON.stringify([...allExpenses, expense]));
-        
-        //updates users array
-        const users = JSON.parse(localStorage.getItem('users')) || [];
-        const index = users.findIndex(u => u.username === user.username);
-        if (index !== -1) {
-            users[index] = user;
-            localStorage.setItem('users', JSON.stringify(users));
-        }
     }
 });
