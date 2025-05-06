@@ -101,13 +101,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    // Chat functionality
+    //chat functions
     const messagesContainer = document.getElementById('messages');
     const userInput = document.getElementById('user-input');
     const sendButton = document.getElementById('send-button');
     const typingIndicator = document.getElementById('typing-indicator');
     
-    // Function to add a message to the chat
+    //add a message to the chat
     function addMessage(message, isUser = false) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
@@ -116,20 +116,19 @@ document.addEventListener('DOMContentLoaded', () => {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
     
-    // Function to send message to the server
+    //function to send a message to the server
     async function sendMessage() {
         const message = userInput.value.trim();
         if (!message) return;
         
-        // Add user message to chat
+        //add a message to the chat
         addMessage(message, true);
         userInput.value = '';
         
-        // Show typing indicator
         typingIndicator.style.display = 'block';
         
         try {
-            // Send message to server
+            //send a message to the server
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: {
@@ -139,8 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             
             const data = await response.json();
-            
-            // Hide typing indicator
             typingIndicator.style.display = 'none';
             
             if (data.error) {
@@ -149,16 +146,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 addMessage(data.reply);
             }
         } catch (error) {
-            // Hide typing indicator
             typingIndicator.style.display = 'none';
-            
             addMessage(`Sorry, there was an error: ${error.message}`);
         }
     }
     
-    // Event listeners
+    //event listeners
     sendButton.addEventListener('click', sendMessage);
-    
     userInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             sendMessage();

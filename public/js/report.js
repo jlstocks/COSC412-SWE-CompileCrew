@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const user = JSON.parse(localStorage.getItem('currentUser'));
     if (!user) {
         alert('Please log in first');
@@ -11,21 +11,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const container = document.getElementById('BasicDiv');
 
+    try {
+        //get expense report from api
+        const response = await fetch(`/api/reports/${user.id}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch report data');
+        }
+        
+        const reportData = await response.json();
+        if (reportData.total === 0) {
+            container.innerHTML += '<h2 id="center">No expenses to report</h2>';
+            return;
+        }
+    
     const expenses = user.expenses || [];
     if (expenses.length === 0) {
         container.innerHTML += '<h2 id="center">No expenses to report</h2>';
         return;
     }
-
-    //total spending
-    const total = expenses.reduce((sum, exp) => sum + exp.amount, 0);
-
-    //spending per category
-    const categoryTotals = {};
-    expenses.forEach(exp => {
-        const category = exp.type || 'Other';
-        categoryTotals[category] = (categoryTotals[category] || 0) + exp.amount;
-    });
 
     //add total to page
     const totalElement = document.createElement('h2');
@@ -42,11 +45,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const list = document.createElement('ul');
     list.style.textAlign = 'center';
 
-    Object.entries(categoryTotals).forEach(([category, amount]) => {
+    reportData.categoryTotals.forEach(category => {
         const li = document.createElement('li');
-        li.textContent = `${category}: $${amount.toFixed(2)}`;
+        li.textContent = `${category._name || 'Uncategorized'}: $${parseFloat(category.total).toFixed(2)}`;
         list.appendChild(li);
     });
 
     container.appendChild(list);
+  } catch (error){
+    container.innerHTML += '<h2 id="center"> Error loading report</h2>';
+    console.error(error);
+  }
 });

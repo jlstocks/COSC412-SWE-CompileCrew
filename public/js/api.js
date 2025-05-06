@@ -1,7 +1,7 @@
-// API base URL - change this to your server's address
+//API base URL
 const API_BASE_URL = 'http://localhost:3000/api';
 
-// Helper function for making API requests
+//helps make API requests
 async function apiRequest(endpoint, method = 'GET', body = null) {
     const options = {
         method,
@@ -27,65 +27,64 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
     }
 }
 
-// Authentication
+//handles authentication requests
 const auth = {
-    // Register a new user
+    //signup as new user
     register: (userData) => apiRequest('/register', 'POST', userData),
     
-    // Login user
+    //login existing user
     login: (credentials) => apiRequest('/login', 'POST', credentials),
     
-    // Store user in session
+    //store users current session
     setCurrentUser: (user) => {
         sessionStorage.setItem('currentUser', JSON.stringify(user));
     },
     
-    // Get current user from session
+    //get user from current session
     getCurrentUser: () => {
         const user = sessionStorage.getItem('currentUser');
         return user ? JSON.parse(user) : null;
     },
     
-    // Remove user from session (logout)
+    //remove users current session
     logout: () => {
         sessionStorage.removeItem('currentUser');
     }
 };
 
-// Expense management
+//manage expenses
 const expenses = {
-    // Add a new expense
+    //add an expense
     add: (expenseData) => apiRequest('/expenses', 'POST', expenseData),
     
-    // Get all expenses for a user
+    //get expenses for active user
     getAll: (userId) => apiRequest(`/expenses/${userId}`),
     
-    // Get recent expenses (last 7 days by default)
+    //get recent expenses
     getRecent: (userId, days = 7) => apiRequest(`/expenses/${userId}/recent?days=${days}`)
 };
 
-// Balance and budget
+//manage balance and budget
 const account = {
-    // Update user's balance
+    //update balance
     updateBalance: (userId, balance) => apiRequest('/update-balance', 'POST', { userId, balance }),
     
-    // Update user's budget
+    //update budget
     updateBudget: (userId, budget) => apiRequest('/update-budget', 'POST', { userId, budget })
 };
 
-// Reports
+//manage reports
 const reports = {
-    // Get user's spending report
+    //get spending report
     get: (userId) => apiRequest(`/reports/${userId}`)
 };
 
-// Categories
+//get categories
 const categories = {
-    // Get all expense categories
     getAll: () => apiRequest('/categories')
 };
 
-// Export all API functions
+//export API functions globally
 const api = {
     auth,
     expenses,
@@ -93,6 +92,4 @@ const api = {
     reports,
     categories
 };
-
-// Make it available globally
 window.api = api;
