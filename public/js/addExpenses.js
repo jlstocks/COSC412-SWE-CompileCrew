@@ -16,13 +16,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     //init UI
     usernameDisplay.textContent = `Hello ${currentUser.name || currentUser.username}`;
+    const balance = currentUser.balance !== undefined && currentUser.balance !== null ? parseFloat(currentUser.balance) : 0;
     balanceDisplay.textContent = `Current Balance: $${currentUser.balance.toFixed(2)}`;
+
     document.querySelector('.budget').textContent = 
         `Current Budget: $${(currentUser.budget ?? currentUser.balance).toFixed(2)}`;
 
     //handles expenses
     confirmButton.addEventListener('click', addExpense);
-
+    const budget = currentUser.budget !== undefined && currentUser.budget !== null ? parseFloat(currentUser.budget) : balance;
     async function addExpense(){
         //validation
         if (!expenseName.value.trim()){

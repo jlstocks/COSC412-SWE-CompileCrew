@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     //add total to page
+    const total = reportData.total ? parseFloat(reportData.total) : 0;
     const totalElement = document.createElement('h2');
     totalElement.id = 'center';
     totalElement.textContent = `Total Expenses: $${total.toFixed(2)}`;

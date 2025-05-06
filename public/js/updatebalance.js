@@ -8,10 +8,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     //displays current info
-    const displayBalance = () => document.querySelector('.balance').textContent = 
+    const displayBalance = () => {
+        const balance = currentUser.balance !== undefined && currentUser.balance !== null ? parseFloat(currentUser.balance) : 0;
+        document.querySelector('.balance').textContent = 
         `Current Balance: $${currentUser.balance.toFixed(2)}`;
-    const displayBudget = () => document.querySelector('.budget').textContent = 
+    };
+    const displayBudget = () => {
+        const balance = currentUser.balance !== undefined && currentUser.balance !== null ? parseFloat(currentUser.balance) : 0;
+        document.querySelector('.budget').textContent = 
         `Current Budget: $${(currentUser.budget ?? currentUser.balance).toFixed(2)}`;
+    };
 
     document.querySelector('.username').textContent = `Hello ${currentUser.name || currentUser.username}`;
     displayBalance();

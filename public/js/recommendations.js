@@ -40,9 +40,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const recentExpenses = allExpenses.filter(exp => 
             new Date(exp.date || exp.createdAt) >= oneMonthAgo);
         
-        const totalSpent = recentExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+        const totalSpent = recentExpenses.reduce((sum, exp) => {
+            const amount = exp.amount !== undefined ? parseFloat(exp.amount) : 0;
+            return sum + (isNaN(amount) ? 0 : amount);
+        }, 0);
         const dailyAverage = totalSpent / 30;
-        const budget = currentUser.budget || currentUser.balance * 0.8;
+        const balance = currentUser.balance !== undefined ? 
+            parseFloat(currentUser.balance) : 0;
+        const budget = currentUser.budget !== undefined ? 
+            parseFloat(currentUser.budget) : (balance * 0.8);
 
         const categorySpending = recentExpenses.reduce((acc, exp) => {
             const category = exp.category?.name || exp.type || 'Other';

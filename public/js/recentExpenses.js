@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         //adds each expense
         recentExpenses.forEach(expense => {
+            const expenseAmount = expense.amount !== undefined ? parseFloat(expense.amount) : 0;
             const expenseElement = document.createElement('div');
             expenseElement.className = 'expense-item';
             expenseElement.innerHTML = `

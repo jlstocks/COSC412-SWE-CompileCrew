@@ -15,7 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     //displays user data with fallbacks
     userDisplay.textContent = `Hello ${user.name || user.username}`;
+    const balance = user.balance !== undefined && user.balance !== null ? parseFloat(user.balance) : 0;
     balanceDisplay.textContent = `Current Balance: $${user.balance.toFixed(2)}`;
+    const budget = user.budget !== undefined && user.budget !== null ? parseFloat(user.budget) : balance;
     budgetDisplay.textContent = `Current Budget: $${(user.budget ?? user.balance).toFixed(2)}`;
 
     //handles logout
