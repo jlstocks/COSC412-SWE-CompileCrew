@@ -21,13 +21,6 @@ npm-debug.log*
 *.swp
 *.swo
 
-# Database files
-*.sqlite
-*.db
-
-# Local database connection settings
-db.js
-
 # Build outputs
 /dist/
 /build/

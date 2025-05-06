@@ -3,13 +3,11 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const db = require('./db');
-
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
+//cross origin resource sharing middleware
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
@@ -18,13 +16,12 @@ db.query(`SELECT 1`)
   .then(() => console.log('Database connection successful'))
   .catch(err => console.error('Database connection error:', err));
 
-
-// User registration endpoint
+//signup endpoint
 app.post('/api/register', async (req, res) => {
   try {
     const { name, username, email, password, balance } = req.body;
     
-    // Check if username already exists
+    //checks if username exists
     const [existingUsers] = await db.execute(
       'SELECT userID FROM User WHERE username = ?',
       [username]
@@ -34,7 +31,7 @@ app.post('/api/register', async (req, res) => {
       return res.status(400).json({ error: 'Username already taken' });
     }
     
-    // Insert user into database
+    //insert user to database
     const [result] = await db.execute(
       'INSERT INTO User (username, email, _password) VALUES (?, ?, ?)',
       [username, email, password]
@@ -42,7 +39,7 @@ app.post('/api/register', async (req, res) => {
     
     const userId = result.insertId;
     
-    // Create account for the user
+    //create new account for new user
     const [accountResult] = await db.execute(
       'INSERT INTO Account (userID, balance) VALUES (?, ?)',
       [userId, balance]
@@ -50,7 +47,7 @@ app.post('/api/register', async (req, res) => {
     
     const accountId = accountResult.insertId;
     
-    // Create initial budget
+    //creates initial budget
     const startDate = new Date();
     const endDate = new Date();
     endDate.setMonth(endDate.getMonth() + 1);
@@ -72,12 +69,12 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// User login endpoint
+//endpoint for user login
 app.post('/api/login', async (req, res) => {
   try {
     const { username, password } = req.body;
     
-    // Get user from database
+    //gets user from database
     const [users] = await db.execute(
       'SELECT u.userID, u.username, u.email, a.accID, a.balance ' +
       'FROM User u ' +
@@ -90,7 +87,7 @@ app.post('/api/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid username or password' });
     }
     
-    // Get user's budget
+    //gets users budget from endpoint
     const [budgets] = await db.execute(
       'SELECT limitAmount FROM Budget WHERE userID = ? AND endDate >= CURDATE() ORDER BY endDate ASC LIMIT 1',
       [users[0].userID]
@@ -115,12 +112,12 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Update balance endpoint
+//update balance at endpoint
 app.post('/api/update-balance', async (req, res) => {
   try {
     const { userId, accountId, balance } = req.body;
     
-    // Update account balance
+    //updates balance for current user
     await db.execute(
       'UPDATE Account SET balance = ? WHERE accID = ? AND userID = ?',
       [balance, accountId, userId]
@@ -133,25 +130,25 @@ app.post('/api/update-balance', async (req, res) => {
   }
 });
 
-// Update budget endpoint
+//update budget endpoint
 app.post('/api/update-budget', async (req, res) => {
   try {
     const { userId, budget } = req.body;
     
-    // Check if budget exists for user
+    //checks if budget exists
     const [budgets] = await db.execute(
       'SELECT * FROM Budget WHERE userID = ? AND endDate >= CURDATE() ORDER BY endDate ASC LIMIT 1',
       [userId]
     );
     
     if (budgets.length > 0) {
-      // Update existing budget
+      //updates existing budget
       await db.execute(
         'UPDATE Budget SET limitAmount = ? WHERE budgetID = ?',
         [budget, budgets[0].budgetID]
       );
     } else {
-      // Create new budget (for current month)
+      //creates new budget for next month
       const startDate = new Date();
       const endDate = new Date();
       endDate.setMonth(endDate.getMonth() + 1);
@@ -169,24 +166,24 @@ app.post('/api/update-budget', async (req, res) => {
   }
 });
 
-// Add expense endpoint
+//endpoint for expenses
 app.post('/api/expenses', async (req, res) => {
   try {
     const { userId, accountId, categoryId, amount, name } = req.body;
     
-    // Insert expense into database
+    //insert expense into database
     await db.execute(
       'INSERT INTO Expenses (userID, accID, categoryID, amount, _date) VALUES (?, ?, ?, ?, CURDATE())',
       [userId, accountId, categoryId, amount]
     );
     
-    // Update account balance
+    //updates account balance
     await db.execute(
       'UPDATE Account SET balance = balance - ? WHERE accID = ?',
       [amount, accountId]
     );
     
-    // Get updated balance
+    //get updated balance
     const [accounts] = await db.execute(
       'SELECT balance FROM Account WHERE accID = ?',
       [accountId]
@@ -202,7 +199,7 @@ app.post('/api/expenses', async (req, res) => {
   }
 });
 
-// Get recent expenses endpoint
+//gets recent expenses
 app.get('/api/expenses/:userId/recent', async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -224,7 +221,7 @@ app.get('/api/expenses/:userId/recent', async (req, res) => {
   }
 });
 
-// Get categories endpoint
+//get categories
 app.get('/api/categories', async (req, res) => {
   try {
     const [categories] = await db.execute(
@@ -238,12 +235,12 @@ app.get('/api/categories', async (req, res) => {
   }
 });
 
-// Get reports endpoint
+//endpoint for reports
 app.get('/api/reports/:userId', async (req, res) => {
   try {
     const userId = req.params.userId;
     
-    // Get expenses grouped by category
+    //group expenses by cateogry
     const [categoryTotals] = await db.execute(
       'SELECT c._name, SUM(e.amount) as total ' +
       'FROM Expenses e ' +
@@ -253,7 +250,7 @@ app.get('/api/reports/:userId', async (req, res) => {
       [userId]
     );
     
-    // Get total expenses
+    //get total expenses
     const [totalResult] = await db.execute(
       'SELECT SUM(amount) as total FROM Expenses WHERE userID = ?',
       [userId]
@@ -269,12 +266,14 @@ app.get('/api/reports/:userId', async (req, res) => {
   }
 });
 
-// AI endpoint
+//endpoint for AI
 app.post('/api/chat', async (req, res) => {
   try {
-    const { message } = req.body;
+    const { message, userId } = req.body;
     
-    // Make a request to OpenAI API
+    const recentExpenses = expensesQuery[0];
+
+    //make request to AI
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -284,7 +283,7 @@ app.post('/api/chat', async (req, res) => {
       body: JSON.stringify({
         model: "gpt-3.5-turbo",
         messages: [
-          { role: "system", content: "You are a helpful assistant with financial expertise." },
+          { role: "system", content: "You are a financial advisor with expertise in personal budgeting. You are to provide concise advice with a focus on strategies to help save money. Encourage responsible spending and use emoticons." },
           { role: "user", content: message }
         ]
       })
