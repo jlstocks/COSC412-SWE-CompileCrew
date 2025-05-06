@@ -269,11 +269,9 @@ app.get('/api/reports/:userId', async (req, res) => {
 //endpoint for AI
 app.post('/api/chat', async (req, res) => {
   try {
-    const { message, userId } = req.body;
-    
-    const recentExpenses = expensesQuery[0];
+    const { message } = req.body;
 
-    //make request to AI
+    // Make a request to OpenAI API
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -283,18 +281,18 @@ app.post('/api/chat', async (req, res) => {
       body: JSON.stringify({
         model: "gpt-3.5-turbo",
         messages: [
-          { role: "system", content: "You are a financial advisor with expertise in personal budgeting. You are to provide concise advice with a focus on strategies to help save money. Encourage responsible spending and use emoticons." },
+          { role: "system", content: "You are a financial assistant with expertise in personal savings. You will provide concise responses to users. You value the importance of budgeting and will kindly make recommendations based on recent spending patterns." },
           { role: "user", content: message }
         ]
       })
     });
-    
+
     const data = await response.json();
-    
+
     if (data.error) {
       throw new Error(data.error.message);
     }
-    
+
     res.json({
       reply: data.choices[0].message.content
     });
@@ -303,6 +301,7 @@ app.post('/api/chat', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // Start the server
 app.listen(PORT, () => {
