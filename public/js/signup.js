@@ -4,10 +4,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     //handles form submission
     signupButton.addEventListener('click', handleSignup);
-    inputs.forEach(input => input.addEventListener('keypress', (e) => e.key === 'Enter' && handleSignup()));
+    inputs.forEach(input =>
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSignup();
+        })
+    );
 
-    async function handleSignup() {
-        //get input values
+    async function handleSignup(){
         const name = document.querySelector('input[placeholder="Name"]').value.trim();
         const email = document.querySelector('.newEmail').value.trim();
         const balance = parseFloat(document.querySelector('.newBalance').value.trim()) || 0;
@@ -27,12 +30,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (password.length < 6){
-            alert('Invalid: Password needs to be at least 6 characters!');
+            alert('Invalid: Password must be at least 6 characters!');
             return;
         }
 
         try {
-            //send registration request to server
+            //registers user
             const response = await fetch('/api/register', {
                 method: 'POST',
                 headers: {
@@ -48,28 +51,30 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const data = await response.json();
-            
-            if (!response.ok) {
+
+            if (!response.ok){
                 throw new Error(data.error || 'Registration failed');
             }
 
-            //create user object for localStorage
-            const newUser = { 
-                id: data.userId,
-                accountId: data.accountId,
-                name, 
-                email, 
-                balance,
-                budget: balance, // Initialize budget = balance
-                username
-            };
+            //immediately log in to get complete user data (budget from DB)
+            const loginResponse = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
 
-            //store user info in localStorage
-            localStorage.setItem('currentUser', JSON.stringify(newUser));
+            const loginData = await loginResponse.json();
+
+            if (!loginResponse.ok){
+                throw new Error('Auto-login failed');
+            }
+
+            // Store full user object from DB
+            localStorage.setItem('currentUser', JSON.stringify(loginData.user));
             window.location.href = 'index.html';
+
         } catch (error) {
-            //handle registration errors
-            if (error.message.includes('Username already taken')) {
+            if (error.message.includes('Username already taken')){
                 alert('Username already taken');
             } else {
                 alert('Error registering: ' + error.message);
@@ -77,3 +82,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
